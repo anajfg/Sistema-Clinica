@@ -22,6 +22,23 @@ class ControladorAtendimento:
     def atendimentos(self):
         return self.__atendimentos
 
+    def paciente_possui_atendimento(self, paciente) -> bool:
+        return any(a.paciente is paciente for a in self.__atendimentos)
+
+    def clinica_possui_atendimento(self, clinica) -> bool:
+        return any(a.clinica is clinica for a in self.__atendimentos)
+
+    def tipo_possui_atendimento(self, tipo) -> bool:
+        return any(a.tipo_atendimento is tipo for a in self.__atendimentos)
+
+    def profissional_possui_vinculo(self, profissional) -> bool:
+        for atendimento in self.__atendimentos:
+            if atendimento.profissional is profissional:
+                return True
+            if any(p.profissional is profissional for p in atendimento.procedimentos):
+                return True
+        return False
+
     def buscar_por_codigo(self, codigo: int) -> Atendimento:
         for atendimento in self.__atendimentos:
             if atendimento.codigo == codigo:

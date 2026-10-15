@@ -1,4 +1,5 @@
 from exception.cpf_duplicado_exception import CpfDuplicadoException
+from exception.objeto_em_uso_exception import ObjetoEmUsoException
 from exception.objeto_nao_encontrado_exception import ObjetoNaoEncontradoException
 from exception.sistema_exception import SistemaException
 from models.paciente import Paciente
@@ -8,7 +9,11 @@ from views.tela_paciente import TelaPaciente
 class ControladorPaciente:
     def __init__(self):
         self.__pacientes = []
+        self.__controlador_atendimento = None
         self.__tela = TelaPaciente()
+
+    def vincula_atendimento(self, controlador_atendimento):
+        self.__controlador_atendimento = controlador_atendimento
 
     @property
     def pacientes(self):
@@ -47,6 +52,9 @@ class ControladorPaciente:
 
     def excluir(self):
         paciente = self.buscar_por_cpf(self.__tela.pega_cpf())
+        if self.__controlador_atendimento.paciente_possui_atendimento(paciente):
+            raise ObjetoEmUsoException(
+                "Não é possível excluir: o paciente possui atendimentos registrados.")
         self.__pacientes.remove(paciente)
         self.__tela.mostra_mensagem("Paciente excluído com sucesso.")
 

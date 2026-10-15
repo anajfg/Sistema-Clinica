@@ -1,3 +1,4 @@
+from exception.objeto_em_uso_exception import ObjetoEmUsoException
 from exception.objeto_nao_encontrado_exception import ObjetoNaoEncontradoException
 from exception.sistema_exception import SistemaException
 from exception.valor_invalido_exception import ValorInvalidoException
@@ -9,7 +10,15 @@ class ControladorClinica:
     def __init__(self, controlador_profissional):
         self.__clinicas = []
         self.__controlador_profissional = controlador_profissional
+        self.__controlador_atendimento = None
         self.__tela = TelaClinica()
+
+    def vincula_atendimento(self, controlador_atendimento):
+        self.__controlador_atendimento = controlador_atendimento
+
+    def desvincular_de_todas(self, profissional):
+        for clinica in self.__clinicas:
+            clinica.remover_profissional(profissional)
 
     @property
     def clinicas(self):
@@ -56,6 +65,9 @@ class ControladorClinica:
 
     def excluir(self):
         clinica = self.buscar_por_nome(self.__tela.pega_nome())
+        if self.__controlador_atendimento.clinica_possui_atendimento(clinica):
+            raise ObjetoEmUsoException(
+                "Não é possível excluir: a clínica possui atendimentos registrados.")
         self.__clinicas.remove(clinica)
         self.__tela.mostra_mensagem("Clínica excluída com sucesso.")
 

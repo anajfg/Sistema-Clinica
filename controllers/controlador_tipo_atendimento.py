@@ -1,3 +1,4 @@
+from exception.objeto_em_uso_exception import ObjetoEmUsoException
 from exception.objeto_nao_encontrado_exception import ObjetoNaoEncontradoException
 from exception.sistema_exception import SistemaException
 from models.tipo_atendimento import TipoAtendimento
@@ -8,7 +9,11 @@ class ControladorTipoAtendimento:
     def __init__(self):
         self.__tipos = []
         self.__proximo_codigo = 1
+        self.__controlador_atendimento = None
         self.__tela = TelaTipoAtendimento()
+
+    def vincula_atendimento(self, controlador_atendimento):
+        self.__controlador_atendimento = controlador_atendimento
 
     @property
     def tipos(self):
@@ -42,6 +47,9 @@ class ControladorTipoAtendimento:
 
     def excluir(self):
         tipo = self.buscar_por_codigo(self.__tela.pega_codigo())
+        if self.__controlador_atendimento.tipo_possui_atendimento(tipo):
+            raise ObjetoEmUsoException(
+                "Não é possível excluir: o tipo está em uso em atendimentos.")
         self.__tipos.remove(tipo)
         self.__tela.mostra_mensagem("Tipo excluído com sucesso.")
 

@@ -1,4 +1,5 @@
 from exception.cpf_duplicado_exception import CpfDuplicadoException
+from exception.objeto_em_uso_exception import ObjetoEmUsoException
 from exception.objeto_nao_encontrado_exception import ObjetoNaoEncontradoException
 from exception.sistema_exception import SistemaException
 from models.profissional_saude import ProfissionalSaude
@@ -8,7 +9,13 @@ from views.tela_profissional import TelaProfissional
 class ControladorProfissional:
     def __init__(self):
         self.__profissionais = []
+        self.__controlador_atendimento = None
+        self.__controlador_clinica = None
         self.__tela = TelaProfissional()
+
+    def vincula_controladores(self, controlador_atendimento, controlador_clinica):
+        self.__controlador_atendimento = controlador_atendimento
+        self.__controlador_clinica = controlador_clinica
 
     @property
     def profissionais(self):
@@ -49,6 +56,11 @@ class ControladorProfissional:
 
     def excluir(self):
         profissional = self.buscar_por_cpf(self.__tela.pega_cpf())
+        if self.__controlador_atendimento.profissional_possui_vinculo(profissional):
+            raise ObjetoEmUsoException(
+                "Não é possível excluir: o profissional possui atendimentos "
+                "ou procedimentos registrados.")
+        self.__controlador_clinica.desvincular_de_todas(profissional)
         self.__profissionais.remove(profissional)
         self.__tela.mostra_mensagem("Profissional excluído com sucesso.")
 
